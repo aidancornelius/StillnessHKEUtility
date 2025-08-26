@@ -1,0 +1,376 @@
+{
+  "source": "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Views/ContentView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Import data",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 20
+        }
+      },
+      {
+        "comment": "",
+        "key": "Export data",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 27
+        }
+      },
+      {
+        "comment": "",
+        "key": "Generate patterns",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "Live stream",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 41
+        }
+      },
+      {
+        "comment": "",
+        "key": "Settings",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 48
+        }
+      },
+      {
+        "comment": "",
+        "key": "Import to simulator",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 155
+        }
+      },
+      {
+        "comment": "",
+        "key": "Import health data",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Select data file",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Data preview",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 106
+        }
+      },
+      {
+        "comment": "",
+        "key": "Import to HealthKit",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 124
+        }
+      },
+      {
+        "comment": "",
+        "key": "Running in simulator",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 73
+        }
+      },
+      {
+        "comment": "",
+        "key": "Import JSON files to populate the simulator's HealthKit database with test data.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 77
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld samples",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 85
+        }
+      },
+      {
+        "comment": "",
+        "key": "Date range:",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 88
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ - %@",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 90
+        }
+      },
+      {
+        "comment": "",
+        "key": "Load different file",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 96
+        }
+      },
+      {
+        "comment": "",
+        "key": "Load JSON file",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 100
+        }
+      },
+      {
+        "comment": "",
+        "key": "Heart rate",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 108
+        }
+      },
+      {
+        "comment": "",
+        "key": "HRV",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 111
+        }
+      },
+      {
+        "comment": "",
+        "key": "Activity",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 114
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sleep",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 117
+        }
+      },
+      {
+        "comment": "",
+        "key": "Workouts",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 120
+        }
+      },
+      {
+        "comment": "",
+        "key": "Import successful",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 141
+        }
+      },
+      {
+        "comment": "",
+        "key": "Import to simulator",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 136
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pattern generator",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 281
+        }
+      },
+      {
+        "comment": "",
+        "key": "Source data",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 215
+        }
+      },
+      {
+        "comment": "",
+        "key": "Target date range",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 230
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pattern generation",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 235
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld samples",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 218
+        }
+      },
+      {
+        "comment": "",
+        "key": "Load exported data",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 225
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start date",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 231
+        }
+      },
+      {
+        "comment": "",
+        "key": "End date",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 232
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pattern type",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 236
+        }
+      },
+      {
+        "comment": "",
+        "key": "Random seed: %lld",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 249
+        }
+      },
+      {
+        "comment": "",
+        "key": "Generate test data",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 262
+        }
+      },
+      {
+        "comment": "",
+        "key": "Generating...",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 259
+        }
+      },
+      {
+        "comment": "",
+        "key": "Export %lld samples",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 269
+        }
+      },
+      {
+        "comment": "",
+        "key": "Settings",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 365
+        }
+      },
+      {
+        "comment": "",
+        "key": "Export defaults",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 343
+        }
+      },
+      {
+        "comment": "",
+        "key": "About",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 348
+        }
+      },
+      {
+        "comment": "",
+        "key": "Days to export: %lld",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 344
+        }
+      },
+      {
+        "comment": "",
+        "key": "Include enhanced metrics",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 345
+        }
+      },
+      {
+        "comment": "",
+        "key": "Version",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 349
+        }
+      },
+      {
+        "comment": "",
+        "key": "Purpose",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 350
+        }
+      },
+      {
+        "comment": "",
+        "key": "View source",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 353
+        }
+      },
+      {
+        "comment": "",
+        "key": "Request HealthKit permissions",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 358
+        }
+      }
+    ]
+  },
+  "version": 1
+}

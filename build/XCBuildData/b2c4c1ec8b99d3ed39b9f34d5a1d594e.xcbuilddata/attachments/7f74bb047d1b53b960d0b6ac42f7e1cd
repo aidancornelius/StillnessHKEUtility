@@ -1,0 +1,128 @@
+{
+  "" : {
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporter-master.dia",
+    "emit-module-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporter-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporter-master-emit-module.dia",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporter-master.swiftdeps"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Core/ExportManager.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportManager.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportManager.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportManager.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportManager.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportManager.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportManager.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportManager.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportManager~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Core/HealthDataExporter.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataExporter.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataExporter.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataExporter.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataExporter.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataExporter.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataExporter.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataExporter.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataExporter~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Core/LiveStreamManager.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamManager.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamManager.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamManager.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamManager.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamManager.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamManager.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamManager.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamManager~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/HealthKitExporterApp.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporterApp.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporterApp.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporterApp.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporterApp.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporterApp.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporterApp.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporterApp.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthKitExporterApp~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Models/HealthDataModels.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataModels.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataModels.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataModels.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataModels.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataModels.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataModels.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataModels.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/HealthDataModels~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Views/ContentView.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Views/DataTypeSelectionView.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DataTypeSelectionView.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DataTypeSelectionView.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DataTypeSelectionView.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DataTypeSelectionView.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DataTypeSelectionView.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DataTypeSelectionView.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DataTypeSelectionView.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DataTypeSelectionView~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Views/DateRangePickerView.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DateRangePickerView.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DateRangePickerView.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DateRangePickerView.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DateRangePickerView.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DateRangePickerView.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DateRangePickerView.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DateRangePickerView.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/DateRangePickerView~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Views/ExportView.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportView.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportView.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportView.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportView.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportView.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportView.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportView.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/ExportView~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Views/LiveStreamView.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamView.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamView.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamView.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamView.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamView.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamView.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamView.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamView~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/HealthKitExporterWidgets/LiveStreamActivityAttributes.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamActivityAttributes.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamActivityAttributes.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamActivityAttributes.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamActivityAttributes.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamActivityAttributes.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamActivityAttributes.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamActivityAttributes.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/LiveStreamActivityAttributes~partial.swiftmodule"
+  },
+  "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/acb/Code/HealthKitExporter/build/HealthKitExporter.build/Debug-iphonesimulator/HealthKitExporter.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

@@ -280,8 +280,8 @@ class HealthDataExporter: ObservableObject {
     
     private func fetchActivity(from startDate: Date, to endDate: Date) async throws -> [ActivitySample] {
         let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
-        let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
-        let caloriesType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
+        // let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
+        // let caloriesType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
         
         let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
         
@@ -354,7 +354,7 @@ class HealthDataExporter: ObservableObject {
                             startDate: workout.startDate,
                             endDate: workout.endDate,
                             type: workout.workoutActivityType.name,
-                            calories: workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()),
+                            calories: nil, // workout.totalEnergyBurned deprecated in iOS 18
                             distance: workout.totalDistance?.doubleValue(for: .meter()),
                             averageHeartRate: nil,
                             source: workout.sourceRevision.source.name
@@ -423,7 +423,7 @@ class HealthDataExporter: ObservableObject {
             importStatus = "Import complete"
         }
         
-        var totalSamples = bundle.sampleCount
+        let totalSamples = bundle.sampleCount
         var processedSamples = 0
         
         // Import heart rate data
@@ -701,7 +701,7 @@ class HealthDataExporter: ObservableObject {
         case "hiking": return .hiking
         case "elliptical": return .elliptical
         case "rowing": return .rowing
-        case "dance": return .dance
+        case "dance": return .socialDance // .dance deprecated in iOS 14
         case "pilates": return .pilates
         case "boxing": return .boxing
         default: return .other

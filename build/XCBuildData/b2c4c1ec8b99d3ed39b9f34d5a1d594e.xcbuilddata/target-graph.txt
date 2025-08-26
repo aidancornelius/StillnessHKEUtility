@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'HealthKitExporter' in project 'HealthKitExporter'
+➜ Explicit dependency on target 'HealthKitExporterWidgetsExtension' in project 'HealthKitExporter'
+Target 'HealthKitExporterWidgetsExtension' in project 'HealthKitExporter' (no dependencies)

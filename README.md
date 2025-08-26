@@ -4,20 +4,22 @@ A tool app for Stillness that exports, transforms, and imports HealthKit data fo
 
 ## Features
 
-### Device mode - Export real data
-When running on a physical device:
+The app basically does what it says on the tin:
+
+### Real device mode
+When running on a physical device with HK data:
 - Export heart rate, HRV, activity, sleep, workouts, and enhanced metrics
 - Select custom date ranges or use quick presets
 - Export to JSON format for use in simulator testing
 
-### Simulator mode - Import test data
+### Simulator mode
 When running in the simulator:
-- Import JSON files directly into simulator's HealthKit database
-- Populate simulator with real device data for testing
+- Import JSON files directly into simulator's HealthKit database ('Share' the JSON file to the simulator)
+- Populate simulator with real device data for testing (you may need to ask it twice, for some reason)
 - Preview data before importing
 - Real-time import progress
 
-### Generate test patterns
+### Generate test patterns (largely useless) 
 - Transform data to different date ranges (e.g., 2022 data → 2025)
 - Apply pattern modifications:
   - Similar pattern: Minor variations
@@ -25,7 +27,7 @@ When running in the simulator:
   - Reduced: Decrease stress levels by 20-40%
   - Inverted: Flip high and low stress periods
   - Random: Add random variations
-- Seed-based generation for reproducible results
+- Seed-based generation for reproducible results (ha)
 
 ## Requirements
 

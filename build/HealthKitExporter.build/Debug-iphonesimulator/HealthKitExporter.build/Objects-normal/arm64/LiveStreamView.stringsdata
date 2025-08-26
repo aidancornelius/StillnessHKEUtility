@@ -1,0 +1,272 @@
+{
+  "source": "/Users/acb/Code/HealthKitExporter/HealthKitExporter/Views/LiveStreamView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Live streaming",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 186
+        }
+      },
+      {
+        "comment": "",
+        "key": "Source data",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 20
+        }
+      },
+      {
+        "comment": "",
+        "key": "Streaming configuration",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 59
+        }
+      },
+      {
+        "comment": "",
+        "key": "Live monitoring",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 91
+        }
+      },
+      {
+        "comment": "",
+        "key": "Streaming controls",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 132
+        }
+      },
+      {
+        "comment": "",
+        "key": "Safety limits",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 157
+        }
+      },
+      {
+        "comment": "",
+        "key": "HR avg: %.1f BPM",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 30
+        }
+      },
+      {
+        "comment": "",
+        "key": "HRV avg: %.1f ms",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 33
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld samples",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 24
+        }
+      },
+      {
+        "comment": "",
+        "key": "Load different data",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 39
+        }
+      },
+      {
+        "comment": "",
+        "key": "No source data loaded",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 45
+        }
+      },
+      {
+        "comment": "",
+        "key": "Load exported health data to use as baseline for streaming patterns.",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "Load source data",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 53
+        }
+      },
+      {
+        "comment": "",
+        "key": "Scenario",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "Interval",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 75
+        }
+      },
+      {
+        "comment": "",
+        "key": "Interval",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 77
+        }
+      },
+      {
+        "comment": "",
+        "key": "15 seconds",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 78
+        }
+      },
+      {
+        "comment": "",
+        "key": "30 seconds",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 79
+        }
+      },
+      {
+        "comment": "",
+        "key": "1 minute",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 80
+        }
+      },
+      {
+        "comment": "",
+        "key": "2 minutes",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 81
+        }
+      },
+      {
+        "comment": "",
+        "key": "5 minutes",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Samples generated:",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 103
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 105
+        }
+      },
+      {
+        "comment": "",
+        "key": "%.1f",
+        "location": {
+          "startingColumn": 46,
+          "startingLine": 121
+        }
+      },
+      {
+        "comment": "",
+        "key": "Stop streaming",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 135
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pause streaming",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 140
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resume streaming",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 145
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start streaming",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 150
+        }
+      },
+      {
+        "comment": "",
+        "key": "Streaming will automatically stop when limits are reached to prevent excessive data generation.",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 173
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max samples per hour:",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 160
+        }
+      },
+      {
+        "comment": "",
+        "key": "3,600",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 162
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max total samples:",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 167
+        }
+      },
+      {
+        "comment": "",
+        "key": "10,000",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 169
+        }
+      }
+    ]
+  },
+  "version": 1
+}

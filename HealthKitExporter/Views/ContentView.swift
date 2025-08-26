@@ -35,11 +35,19 @@ struct ContentView: View {
                 }
                 .tag(1)
             
+            if exportManager.isSimulator {
+                LiveStreamView()
+                    .tabItem {
+                        Label("Live stream", systemImage: "dot.radiowaves.left.and.right")
+                    }
+                    .tag(2)
+            }
+            
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
-                .tag(2)
+                .tag(exportManager.isSimulator ? 3 : 2)
         }
         .task {
             if !exportManager.isAuthorized {
@@ -341,7 +349,7 @@ struct SettingsView: View {
                     LabeledContent("Version", value: "1.0.0")
                     LabeledContent("Purpose", value: "Development testing")
                     
-                    Link(destination: URL(string: "https://github.com")!) {
+                    Link(destination: URL(string: "https://github.com/aidancornelius/StillnessHKEUtility")!) {
                         Label("View source", systemImage: "chevron.left.forwardslash.chevron.right")
                     }
                 }
