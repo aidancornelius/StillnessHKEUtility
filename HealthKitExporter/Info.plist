@@ -2,15 +2,19 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSHealthShareUsageDescription</key>
-	<string>This app exports your health data for testing purposes in development apps.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>This app imports test data to the simulator's HealthKit database for development testing.</string>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>processing</string>
+		<string>fetch</string>
+		<string>background-processing</string>
+		<string>audio</string>
+		<string>location</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app uses the local network to stream health data between your device and simulator for development and testing purposes.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_healthkitstream._tcp</string>
 	</array>
 </dict>
 </plist>

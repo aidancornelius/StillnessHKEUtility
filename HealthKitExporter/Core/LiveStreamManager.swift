@@ -10,13 +10,23 @@ import HealthKit
 import SwiftUI
 import UIKit
 import ActivityKit
+import AVFoundation
+import CoreLocation
+import BackgroundTasks
 
 @MainActor
 class LiveStreamManager: ObservableObject {
     private let healthStore = HKHealthStore()
     private var streamingTimer: Timer?
     private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    private var secondaryBackgroundTask: UIBackgroundTaskIdentifier = .invalid
     private var liveActivity: Activity<LiveStreamActivityAttributes>?
+    
+    // Aggressive background processing components
+    private var audioPlayer: AVAudioPlayer?
+    private let locationManager = CLLocationManager()
+    private var backgroundTaskQueue: [UIBackgroundTaskIdentifier] = []
+    private var keepAliveTimer: Timer?
     
     @Published var isStreaming = false
     @Published var currentScenario: StreamingScenario = .normal
@@ -24,7 +34,12 @@ class LiveStreamManager: ObservableObject {
     @Published var totalSamplesGenerated = 0
     @Published var lastGeneratedValues: [String: Double] = [:]
     @Published var streamingStatus = "Ready to stream"
+    @Published var detailedStatus = "Waiting for streaming to start"
+    @Published var backgroundProcessingActive = false
     @Published var sourceBundle: ExportedHealthBundle?
+    
+    // Network streaming
+    @MainActor private lazy var networkManager = NetworkStreamingManager()
     
     // Safety limits
     private let maxSamplesPerHour = 3600 // 1 per second max
@@ -36,6 +51,16 @@ class LiveStreamManager: ObservableObject {
     private var baselineHeartRate: Double = 70
     private var baselineHRV: Double = 45
     private var currentSeed: Int = 0
+    
+    var networkStreamingManager: NetworkStreamingManager {
+        networkManager
+    }
+    
+    init() {
+        Task { @MainActor in
+            setupAggressiveBackgroundProcessing()
+        }
+    }
     
     // MARK: - Streaming Control
     
@@ -56,12 +81,23 @@ class LiveStreamManager: ObservableObject {
         
         isStreaming = true
         streamingStatus = "Streaming \(currentScenario.rawValue)..."
+        detailedStatus = "Initializing streaming engine..."
+        backgroundProcessingActive = true
         
         // Start Live Activity
         startLiveActivity()
         
         // Start background task for when app goes to background
         beginBackgroundTask()
+        
+        // Auto-start network broadcasting on device
+        #if !targetEnvironment(simulator)
+        if !networkManager.isServerRunning {
+            networkManager.startServer()
+        }
+        #endif
+        
+        detailedStatus = "Background processing enabled, streaming active"
         
         // Start streaming timer
         streamingTimer = Timer.scheduledTimer(withTimeInterval: streamingInterval, repeats: true) { [weak self] _ in
@@ -83,6 +119,8 @@ class LiveStreamManager: ObservableObject {
         
         isStreaming = false
         streamingStatus = "Streaming stopped"
+        detailedStatus = "Stopping background processing..."
+        backgroundProcessingActive = false
         
         streamingTimer?.invalidate()
         streamingTimer = nil
@@ -92,6 +130,16 @@ class LiveStreamManager: ObservableObject {
         
         // End Live Activity
         endLiveActivity()
+        
+        // Auto-stop network broadcasting on device if no manual network streaming
+        #if !targetEnvironment(simulator)
+        if networkManager.isServerRunning {
+            networkManager.stopServer()
+        }
+        #endif
+        
+        // Disable aggressive background processing
+        disableAggressiveBackgroundProcessing()
         
         endBackgroundTask()
     }
@@ -113,20 +161,65 @@ class LiveStreamManager: ObservableObject {
         streamingStatus = "Streaming \(currentScenario.rawValue)..."
     }
     
+    // MARK: - Network Streaming Control
+    
+    func startNetworkStreaming() {
+        // Enable background processing for network streaming
+        if !backgroundProcessingActive {
+            backgroundProcessingActive = true
+            beginBackgroundTask()
+        }
+        networkManager.startServer()
+    }
+    
+    func stopNetworkStreaming() {
+        networkManager.stopServer()
+        // Keep background processing if live streaming is still active
+        if !isStreaming {
+            backgroundProcessingActive = false
+            disableAggressiveBackgroundProcessing()
+            endBackgroundTask()
+        }
+    }
+    
+    func startReceivingNetworkStream() {
+        // Enable background processing for network receiving
+        if !backgroundProcessingActive {
+            backgroundProcessingActive = true
+            beginBackgroundTask()
+        }
+        networkManager.startDiscovery()
+    }
+    
+    func stopReceivingNetworkStream() {
+        networkManager.stopDiscovery()
+        networkManager.disconnect()
+        // Keep background processing if live streaming is still active
+        if !isStreaming {
+            backgroundProcessingActive = false
+            disableAggressiveBackgroundProcessing()
+            endBackgroundTask()
+        }
+    }
+    
     // MARK: - Data Generation
     
-    private func generateAndStreamSample() async {
+    internal func generateAndStreamSample() async {
         // Safety checks
         guard samplesGeneratedThisHour < maxSamplesPerHour else {
             streamingStatus = "Hourly limit reached, waiting..."
+            detailedStatus = "Rate limited: \(samplesGeneratedThisHour)/\(maxSamplesPerHour) samples this hour"
             return
         }
         
         guard totalSamplesGenerated < maxTotalSamples else {
             streamingStatus = "Total limit reached, stopping..."
+            detailedStatus = "Maximum samples reached: \(totalSamplesGenerated)/\(maxTotalSamples)"
             stopStreaming()
             return
         }
+        
+        detailedStatus = "Generating sample \(totalSamplesGenerated + 1)..."
         
         do {
             let now = Date()
@@ -169,13 +262,27 @@ class LiveStreamManager: ObservableObject {
                 "HRV": hrvValue
             ]
             
+            // Send data over network if connected
+            let healthPacket = HealthDataPacket(
+                timestamp: now,
+                heartRate: heartRateValue,
+                hrv: hrvValue,
+                scenario: currentScenario.rawValue
+            )
+            networkManager.sendHealthData(healthPacket)
+            
+            let elapsed = Date().timeIntervalSince(backgroundTaskQueue.isEmpty ? Date() : Date().addingTimeInterval(-30))
+            let rate = totalSamplesGenerated > 0 ? Double(totalSamplesGenerated) / max(elapsed / 60, 1) : 0
+            
             streamingStatus = "Streaming (\(totalSamplesGenerated) samples)"
+            detailedStatus = "Active: \(String(format: "%.1f", rate)) samples/min, Background: \(backgroundProcessingActive ? "ON" : "OFF")"
             
             // Update Live Activity
             updateLiveActivity()
             
         } catch {
             streamingStatus = "Error: \(error.localizedDescription)"
+            detailedStatus = "Error generating sample: \(error.localizedDescription)"
         }
     }
     
@@ -249,6 +356,14 @@ class LiveStreamManager: ObservableObject {
         backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "HealthDataStreaming") { [weak self] in
             self?.endBackgroundTask()
         }
+        
+        // Start secondary background task as backup
+        secondaryBackgroundTask = UIApplication.shared.beginBackgroundTask(withName: "HealthDataStreamingBackup") { [weak self] in
+            self?.endSecondaryBackgroundTask()
+        }
+        
+        // Start aggressive background processing
+        enableAggressiveBackgroundProcessing()
     }
     
     private func endBackgroundTask() {
@@ -256,6 +371,192 @@ class LiveStreamManager: ObservableObject {
             UIApplication.shared.endBackgroundTask(backgroundTask)
             backgroundTask = .invalid
         }
+    }
+    
+    private func endSecondaryBackgroundTask() {
+        if secondaryBackgroundTask != .invalid {
+            UIApplication.shared.endBackgroundTask(secondaryBackgroundTask)
+            secondaryBackgroundTask = .invalid
+        }
+    }
+    
+    // MARK: - Aggressive Background Processing
+    
+    private func setupAggressiveBackgroundProcessing() {
+        setupSilentAudio()
+        setupLocationMonitoring()
+        Task {
+            await scheduleBackgroundAppRefresh()
+        }
+    }
+    
+    private func setupSilentAudio() {
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playback, 
+                                       mode: .default, 
+                                       options: [.mixWithOthers, .allowBluetooth])
+            try audioSession.setActive(true)
+            
+            // Create silent audio file URL (we'll create a 1-second silent audio loop)
+            guard let silentAudioURL = createSilentAudioFile() else {
+                print("Failed to create silent audio file")
+                return
+            }
+            
+            audioPlayer = try AVAudioPlayer(contentsOf: silentAudioURL)
+            audioPlayer?.numberOfLoops = -1 // Infinite loop
+            audioPlayer?.volume = 0.005 // Very quiet but not silent
+            
+        } catch {
+            print("Failed to setup silent audio: \(error)")
+        }
+    }
+    
+    private func createSilentAudioFile() -> URL? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let audioURL = documentsPath.appendingPathComponent("silent.wav")
+        
+        // If file already exists, return it
+        if FileManager.default.fileExists(atPath: audioURL.path) {
+            return audioURL
+        }
+        
+        // Create a 1-second WAV file with minimal audio data
+        let sampleRate = 44100.0
+        let duration = 1.0
+        let samples = Int(sampleRate * duration)
+        
+        var audioData = Data()
+        
+        // WAV header
+        audioData.append("RIFF".data(using: .ascii)!)
+        audioData.append(withUnsafeBytes(of: UInt32(36 + samples * 2).littleEndian) { Data($0) })
+        audioData.append("WAVE".data(using: .ascii)!)
+        audioData.append("fmt ".data(using: .ascii)!)
+        audioData.append(withUnsafeBytes(of: UInt32(16).littleEndian) { Data($0) }) // Subchunk1Size
+        audioData.append(withUnsafeBytes(of: UInt16(1).littleEndian) { Data($0) })  // AudioFormat (PCM)
+        audioData.append(withUnsafeBytes(of: UInt16(1).littleEndian) { Data($0) })  // NumChannels
+        audioData.append(withUnsafeBytes(of: UInt32(sampleRate).littleEndian) { Data($0) }) // SampleRate
+        audioData.append(withUnsafeBytes(of: UInt32(sampleRate * 2).littleEndian) { Data($0) }) // ByteRate
+        audioData.append(withUnsafeBytes(of: UInt16(2).littleEndian) { Data($0) })  // BlockAlign
+        audioData.append(withUnsafeBytes(of: UInt16(16).littleEndian) { Data($0) }) // BitsPerSample
+        audioData.append("data".data(using: .ascii)!)
+        audioData.append(withUnsafeBytes(of: UInt32(samples * 2).littleEndian) { Data($0) })
+        
+        // Audio data (very quiet sine wave to avoid complete silence)
+        for i in 0..<samples {
+            let amplitude = Int16(10) // Very quiet
+            let sample = Int16(sin(Double(i) * 2.0 * .pi * 440.0 / sampleRate) * Double(amplitude))
+            audioData.append(withUnsafeBytes(of: sample.littleEndian) { Data($0) })
+        }
+        
+        do {
+            try audioData.write(to: audioURL)
+            return audioURL
+        } catch {
+            print("Failed to write silent audio file: \(error)")
+            return nil
+        }
+    }
+    
+    private func setupLocationMonitoring() {
+        locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers // Very coarse
+        locationManager.distanceFilter = 1000 // 1km
+        
+        // Request always authorization for background location
+        if locationManager.authorizationStatus == .notDetermined {
+            locationManager.requestAlwaysAuthorization()
+        }
+        
+        // Enable significant location changes (very low power)
+        if CLLocationManager.significantLocationChangeMonitoringAvailable() {
+            locationManager.startMonitoringSignificantLocationChanges()
+        }
+    }
+    
+    private func scheduleBackgroundAppRefresh() async {
+        // Skip scheduling when app is being debugged
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] != nil ||
+           ProcessInfo.processInfo.arguments.contains("-NSDocumentRevisionsDebugMode") {
+            return
+        }
+        #endif
+        
+        let request = BGAppRefreshTaskRequest(identifier: "com.healthkitexporter.datastreaming")
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 30) // Try to run every 30 seconds
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            // Don't log errors in debug mode as BGTaskScheduler doesn't work when debugging
+            #if !DEBUG
+            print("Failed to schedule background app refresh: \(error)")
+            #endif
+        }
+    }
+    
+    private func enableAggressiveBackgroundProcessing() {
+        // Start silent audio playback
+        audioPlayer?.play()
+        
+        // Create multiple overlapping background tasks
+        createMultipleBackgroundTasks()
+        
+        // Start keep-alive timer
+        startKeepAliveTimer()
+    }
+    
+    private func createMultipleBackgroundTasks() {
+        // Simplified background task management - only create one additional task
+        var taskId: UIBackgroundTaskIdentifier = .invalid
+        taskId = UIApplication.shared.beginBackgroundTask(withName: "HealthDataProcessing") {
+            Task { @MainActor [weak self] in
+                // Properly end the task when it expires
+                if let index = self?.backgroundTaskQueue.firstIndex(of: taskId) {
+                    self?.backgroundTaskQueue.remove(at: index)
+                }
+                UIApplication.shared.endBackgroundTask(taskId)
+                print("🕐 Background task expired and ended")
+            }
+        }
+        
+        if taskId != .invalid {
+            backgroundTaskQueue.append(taskId)
+            print("✅ Created background task: \(taskId)")
+        }
+    }
+    
+    private func startKeepAliveTimer() {
+        // Only keep silent audio playing for background processing
+        // Skip complex background task management while debugging
+        keepAliveTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                // Just keep the audio player active
+                if let audioPlayer = self?.audioPlayer, !audioPlayer.isPlaying {
+                    audioPlayer.play()
+                    print("🔊 Restarted silent audio for background processing")
+                }
+            }
+        }
+    }
+    
+    private func disableAggressiveBackgroundProcessing() {
+        audioPlayer?.stop()
+        
+        keepAliveTimer?.invalidate()
+        keepAliveTimer = nil
+        
+        // End all background tasks in queue
+        for taskId in backgroundTaskQueue {
+            UIApplication.shared.endBackgroundTask(taskId)
+        }
+        backgroundTaskQueue.removeAll()
+        
+        endSecondaryBackgroundTask()
+        
+        locationManager.stopMonitoringSignificantLocationChanges()
     }
     
     // MARK: - Helper Methods
@@ -287,94 +588,45 @@ class LiveStreamManager: ObservableObject {
     // MARK: - Live Activity Management
     
     private func startLiveActivity() {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        
-        let attributes = LiveStreamActivityAttributes(
-            startTime: Date(),
-            interval: streamingInterval
-        )
-        
-        let initialState = LiveStreamActivityAttributes.ContentState(
-            isStreaming: true,
-            scenario: currentScenario.rawValue,
-            totalSamples: totalSamplesGenerated,
-            lastHeartRate: nil,
-            lastHRV: nil,
-            streamingStatus: streamingStatus,
-            lastUpdateTime: Date()
-        )
-        
-        do {
-            liveActivity = try Activity<LiveStreamActivityAttributes>.request(
-                attributes: attributes,
-                contentState: initialState,
-                pushType: nil
-            )
-        } catch {
-            print("Failed to start Live Activity: \(error)")
-        }
+        // Live Activity support disabled for now - can be enabled later
+        print("Live Activity would start here")
     }
     
     private func updateLiveActivity() {
-        guard let liveActivity = liveActivity else { return }
-        
-        Task {
-            let updatedState = LiveStreamActivityAttributes.ContentState(
-                isStreaming: isStreaming,
-                scenario: currentScenario.rawValue,
-                totalSamples: totalSamplesGenerated,
-                lastHeartRate: lastGeneratedValues["Heart Rate"],
-                lastHRV: lastGeneratedValues["HRV"],
-                streamingStatus: streamingStatus,
-                lastUpdateTime: Date()
-            )
-            
-            await liveActivity.update(using: updatedState)
-        }
+        // Live Activity support disabled for now - can be enabled later
+        print("Live Activity would update here")
     }
     
     private func endLiveActivity() {
-        guard let liveActivity = liveActivity else { return }
-        
-        Task {
-            let finalState = LiveStreamActivityAttributes.ContentState(
-                isStreaming: false,
-                scenario: currentScenario.rawValue,
-                totalSamples: totalSamplesGenerated,
-                lastHeartRate: lastGeneratedValues["Heart Rate"],
-                lastHRV: lastGeneratedValues["HRV"],
-                streamingStatus: "Stopped",
-                lastUpdateTime: Date()
-            )
-            
-            await liveActivity.end(using: finalState, dismissalPolicy: .default)
-            self.liveActivity = nil
-        }
+        // Live Activity support disabled for now - can be enabled later
+        print("Live Activity would end here")
     }
     
     deinit {
         // Clean up without capturing self
         streamingTimer?.invalidate()
         hourlyResetTimer?.invalidate()
+        keepAliveTimer?.invalidate()
         
-        if backgroundTask != .invalid {
-            UIApplication.shared.endBackgroundTask(backgroundTask)
-        }
+        audioPlayer?.stop()
+        locationManager.stopMonitoringSignificantLocationChanges()
         
-        // End live activity without capturing self
-        if let activity = liveActivity {
-            Task {
-                await activity.end(using: LiveStreamActivityAttributes.ContentState(
-                    isStreaming: false,
-                    scenario: "Stopped",
-                    totalSamples: 0,
-                    lastHeartRate: nil,
-                    lastHRV: nil,
-                    streamingStatus: "App closing",
-                    lastUpdateTime: Date()
-                ), dismissalPolicy: .immediate)
+        Task { @MainActor in
+            if backgroundTask != .invalid {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+            }
+            
+            if secondaryBackgroundTask != .invalid {
+                UIApplication.shared.endBackgroundTask(secondaryBackgroundTask)
+            }
+            
+            // End all queued background tasks
+            for taskId in backgroundTaskQueue {
+                UIApplication.shared.endBackgroundTask(taskId)
             }
         }
+        
+        // Live Activity cleanup would go here if enabled
     }
 }
 

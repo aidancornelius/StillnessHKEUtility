@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var exportManager: ExportManager
+    @EnvironmentObject var liveStreamManager: LiveStreamManager
     @State private var selectedTab = 0
     
     var body: some View {
@@ -31,23 +32,29 @@ struct ContentView: View {
             
             GeneratorView()
                 .tabItem {
-                    Label("Generate patterns", systemImage: "waveform.path")
+                    Label("Generate", systemImage: "waveform.path")
                 }
                 .tag(1)
             
             if exportManager.isSimulator {
                 LiveStreamView()
                     .tabItem {
-                        Label("Live stream", systemImage: "dot.radiowaves.left.and.right")
+                        Label("Live generate", systemImage: "dot.radiowaves.left.and.right")
                     }
                     .tag(2)
             }
+            
+            NetworkStreamView(liveStreamManager: liveStreamManager)
+                .tabItem {
+                    Label("Network stream", systemImage: "wifi.router")
+                }
+                .tag(exportManager.isSimulator ? 3 : 2)
             
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
-                .tag(exportManager.isSimulator ? 3 : 2)
+                .tag(exportManager.isSimulator ? 4 : 3)
         }
         .task {
             if !exportManager.isAuthorized {

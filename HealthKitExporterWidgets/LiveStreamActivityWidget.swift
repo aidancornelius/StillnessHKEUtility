@@ -72,17 +72,34 @@ struct LiveStreamActivityWidget: Widget {
                 }
                 
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack {
-                        Image(systemName: context.state.isStreaming ? "circle.fill" : "circle")
-                            .foregroundStyle(context.state.isStreaming ? .green : .gray)
-                            .font(.caption2)
-                        Text(context.state.streamingStatus)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(context.state.lastUpdateTime, style: .time)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                    VStack(spacing: 4) {
+                        HStack {
+                            Image(systemName: context.state.isStreaming ? "circle.fill" : "circle")
+                                .foregroundStyle(context.state.isStreaming ? .green : .gray)
+                                .font(.caption2)
+                            Text(context.state.streamingStatus)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            
+                            if context.state.backgroundProcessingActive {
+                                Image(systemName: "moon.zzz.fill")
+                                    .foregroundStyle(.blue)
+                                    .font(.caption2)
+                            }
+                            
+                            Text(context.state.lastUpdateTime, style: .time)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        HStack {
+                            Text(context.state.detailedStatus)
+                                .font(.system(.caption2, design: .monospaced))
+                                .foregroundStyle(.tertiary)
+                                .lineLimit(1)
+                            Spacer()
+                        }
                     }
                 }
             } compactLeading: {
@@ -118,7 +135,7 @@ struct LiveStreamLockScreenView: View {
                             Circle()
                                 .stroke(.white.opacity(0.3), lineWidth: 1)
                         )
-                    Text("LIVE STREAMING")
+                    Text("LIVE GENERATION")
                         .font(.system(.headline, design: .monospaced))
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
@@ -132,6 +149,11 @@ struct LiveStreamLockScreenView: View {
                 Text(context.state.streamingStatus.uppercased())
                     .font(.system(.caption2, design: .monospaced))
                     .foregroundStyle(.white.opacity(0.8))
+                
+                Text(context.state.detailedStatus.uppercased())
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.cyan.opacity(0.8))
+                    .lineLimit(1)
             }
             
             Spacer()

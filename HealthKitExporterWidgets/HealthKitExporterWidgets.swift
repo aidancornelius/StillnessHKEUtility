@@ -12,5 +12,6 @@ import WidgetKit
 struct HealthKitExporterWidgets: WidgetBundle {
     var body: some Widget {
         LiveStreamActivityWidget()
+        NetworkStreamActivityWidget()
     }
 }

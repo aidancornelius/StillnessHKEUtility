@@ -16,6 +16,8 @@ struct LiveStreamActivityAttributes: ActivityAttributes {
         var lastHeartRate: Double?
         var lastHRV: Double?
         var streamingStatus: String
+        var detailedStatus: String
+        var backgroundProcessingActive: Bool
         var lastUpdateTime: Date
     }
     

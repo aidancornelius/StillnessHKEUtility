@@ -1,2 +1,0 @@
-Target dependency graph (1 target)
-Target 'HealthKitExporterWidgetsExtension' in project 'HealthKitExporter' (no dependencies)

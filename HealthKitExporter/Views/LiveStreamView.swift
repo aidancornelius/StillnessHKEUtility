@@ -128,6 +128,48 @@ struct LiveStreamView: View {
                     }
                 }
                 
+                // Network Status Section  
+                #if !targetEnvironment(simulator)
+                Section("Network broadcasting") {
+                    HStack {
+                        Image(systemName: liveStreamManager.networkStreamingManager.isServerRunning ? "antenna.radiowaves.left.and.right" : "antenna.radiowaves.left.and.right.slash")
+                            .foregroundStyle(liveStreamManager.networkStreamingManager.isServerRunning ? .green : .secondary)
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Broadcast Status")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(liveStreamManager.networkStreamingManager.isServerRunning ? "Broadcasting to simulators" : "Not broadcasting")
+                                .font(.subheadline)
+                        }
+                        
+                        Spacer()
+                        
+                        if liveStreamManager.networkStreamingManager.totalDataSent > 0 {
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text("Sent")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text("\(liveStreamManager.networkStreamingManager.totalDataSent)")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                            }
+                        }
+                    }
+                    
+                    if liveStreamManager.networkStreamingManager.isClientConnected {
+                        HStack {
+                            Circle()
+                                .fill(.green)
+                                .frame(width: 6, height: 6)
+                            Text("Simulator connected - receiving data")
+                                .font(.caption)
+                                .foregroundStyle(.green)
+                        }
+                    }
+                }
+                #endif
+                
                 // Streaming Controls Section
                 Section("Streaming controls") {
                     if liveStreamManager.isStreaming {
@@ -183,7 +225,7 @@ struct LiveStreamView: View {
                     }
                 }
             }
-            .navigationTitle("Live streaming")
+            .navigationTitle("Live generation")
             .fileImporter(
                 isPresented: $showingFilePicker,
                 allowedContentTypes: [.json],
