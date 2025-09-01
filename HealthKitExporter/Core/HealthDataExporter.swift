@@ -46,7 +46,13 @@ class HealthDataExporter: ObservableObject {
             HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
             HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
             HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
-            HKObjectType.workoutType()
+            HKObjectType.workoutType(),
+            // New types for Equilibria compatibility
+            HKObjectType.quantityType(forIdentifier: .pushCount)!,
+            HKObjectType.quantityType(forIdentifier: .distanceWheelchair)!,
+            HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!,
+            HKObjectType.quantityType(forIdentifier: .bodyTemperature)!,
+            HKObjectType.categoryType(forIdentifier: .menstrualFlow)!
         ]
         
         // Add enhanced metrics if available
@@ -76,11 +82,17 @@ class HealthDataExporter: ObservableObject {
                 HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
                 HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
                 HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
-                HKObjectType.workoutType()
+                HKObjectType.workoutType(),
+                // New types for Equilibria compatibility
+                HKObjectType.quantityType(forIdentifier: .pushCount)!,
+                HKObjectType.quantityType(forIdentifier: .distanceWheelchair)!,
+                // Note: appleExerciseTime is read-only, cannot write to it
+                HKObjectType.quantityType(forIdentifier: .bodyTemperature)!,
+                HKObjectType.categoryType(forIdentifier: .menstrualFlow)!
             ]
             
             // Note: respiratoryRate and oxygenSaturation might be read-only depending on iOS version
-            
+            // Note: appleExerciseTime is read-only (calculated by Apple)
             // Note: appleSleepingWristTemperature is read-only, cannot write to it
         }
         
@@ -125,6 +137,10 @@ class HealthDataExporter: ObservableObject {
         var respiratoryRate: [RespiratorySample]? = nil
         var bloodOxygen: [OxygenSample]? = nil
         var skinTemperature: [TemperatureSample]? = nil
+        var wheelchairActivity: [WheelchairActivitySample]? = nil
+        var exerciseTime: [ExerciseTimeSample]? = nil
+        var bodyTemperature: [BodyTemperatureSample]? = nil
+        var menstrualFlow: [MenstrualFlowSample]? = nil
         
         let totalSteps = dataTypes.count
         var currentStep = 0
@@ -187,6 +203,34 @@ class HealthDataExporter: ObservableObject {
             exportProgress = Double(currentStep) / Double(totalSteps)
         }
         
+        if dataTypes.contains(.wheelchairActivity) {
+            exportStatus = "Fetching wheelchair activity..."
+            wheelchairActivity = try await fetchWheelchairActivity(from: startDate, to: endDate)
+            currentStep += 1
+            exportProgress = Double(currentStep) / Double(totalSteps)
+        }
+        
+        if dataTypes.contains(.exerciseTime) {
+            exportStatus = "Fetching exercise time..."
+            exerciseTime = try await fetchExerciseTime(from: startDate, to: endDate)
+            currentStep += 1
+            exportProgress = Double(currentStep) / Double(totalSteps)
+        }
+        
+        if dataTypes.contains(.bodyTemperature) {
+            exportStatus = "Fetching body temperature..."
+            bodyTemperature = try await fetchBodyTemperature(from: startDate, to: endDate)
+            currentStep += 1
+            exportProgress = Double(currentStep) / Double(totalSteps)
+        }
+        
+        if dataTypes.contains(.menstrualFlow) {
+            exportStatus = "Fetching menstrual flow data..."
+            menstrualFlow = try await fetchMenstrualFlow(from: startDate, to: endDate)
+            currentStep += 1
+            exportProgress = Double(currentStep) / Double(totalSteps)
+        }
+        
         return ExportedHealthBundle(
             exportDate: Date(),
             startDate: startDate,
@@ -199,7 +243,11 @@ class HealthDataExporter: ObservableObject {
             restingHeartRate: restingHeartRate,
             respiratoryRate: respiratoryRate,
             bloodOxygen: bloodOxygen,
-            skinTemperature: skinTemperature
+            skinTemperature: skinTemperature,
+            wheelchairActivity: wheelchairActivity,
+            exerciseTime: exerciseTime,
+            bodyTemperature: bodyTemperature,
+            menstrualFlow: menstrualFlow
         )
     }
     
@@ -406,6 +454,86 @@ class HealthDataExporter: ObservableObject {
         return samples.map { TemperatureSample(date: $0.startDate, value: $0.value) }
     }
     
+    private func fetchWheelchairActivity(from startDate: Date, to endDate: Date) async throws -> [WheelchairActivitySample]? {
+        let pushType = HKQuantityType.quantityType(forIdentifier: .pushCount)!
+        let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWheelchair)!
+        
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        
+        // Fetch pushes
+        let pushes = try await fetchQuantitySamples(type: pushType, unit: HKUnit.count(), predicate: predicate)
+        
+        // Fetch distance
+        let distances = try await fetchQuantitySamples(type: distanceType, unit: HKUnit.meter(), predicate: predicate)
+        
+        // Combine data (simplified - in real app would correlate by time)
+        return pushes.map { push in
+            WheelchairActivitySample(
+                date: push.startDate,
+                endDate: push.endDate,
+                pushCount: push.value,
+                distance: distances.first(where: { abs($0.startDate.timeIntervalSince(push.startDate)) < 60 })?.value,
+                source: push.source
+            )
+        }
+    }
+    
+    private func fetchExerciseTime(from startDate: Date, to endDate: Date) async throws -> [ExerciseTimeSample]? {
+        let type = HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!
+        let unit = HKUnit.minute()
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        
+        let samples = try await fetchQuantitySamples(type: type, unit: unit, predicate: predicate)
+        return samples.map { ExerciseTimeSample(date: $0.startDate, endDate: $0.endDate, minutes: $0.value, source: $0.source) }
+    }
+    
+    private func fetchBodyTemperature(from startDate: Date, to endDate: Date) async throws -> [BodyTemperatureSample]? {
+        let type = HKQuantityType.quantityType(forIdentifier: .bodyTemperature)!
+        let unit = HKUnit.degreeCelsius()
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        
+        let samples = try await fetchQuantitySamples(type: type, unit: unit, predicate: predicate)
+        return samples.map { BodyTemperatureSample(date: $0.startDate, value: $0.value, source: $0.source) }
+    }
+    
+    private func fetchMenstrualFlow(from startDate: Date, to endDate: Date) async throws -> [MenstrualFlowSample]? {
+        let type = HKObjectType.categoryType(forIdentifier: .menstrualFlow)!
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
+            let query = HKSampleQuery(sampleType: type, predicate: predicate,
+                                     limit: HKObjectQueryNoLimit, sortDescriptors: [sort]) { _, samples, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    let flowSamples = (samples as? [HKCategorySample] ?? []).compactMap { sample -> MenstrualFlowSample? in
+                        guard let value = HKCategoryValueMenstrualFlow(rawValue: sample.value) else { return nil }
+                        
+                        let flowLevel: MenstrualFlowLevel
+                        switch value {
+                        case .unspecified: flowLevel = .unspecified
+                        case .light: flowLevel = .light
+                        case .medium: flowLevel = .medium
+                        case .heavy: flowLevel = .heavy
+                        case .none: flowLevel = .none
+                        @unknown default: flowLevel = .unspecified
+                        }
+                        
+                        return MenstrualFlowSample(
+                            date: sample.startDate,
+                            endDate: sample.endDate,
+                            flowLevel: flowLevel,
+                            source: sample.sourceRevision.source.name
+                        )
+                    }
+                    continuation.resume(returning: flowSamples)
+                }
+            }
+            healthStore.execute(query)
+        }
+    }
+    
     // MARK: - Data Import (Simulator Only)
     
     func importData(_ bundle: ExportedHealthBundle) async throws {
@@ -485,6 +613,38 @@ class HealthDataExporter: ObservableObject {
         if let temp = bundle.skinTemperature, !temp.isEmpty {
             importStatus = "Skipping skin temperature (read-only)..."
             processedSamples += temp.count
+            importProgress = Double(processedSamples) / Double(totalSamples)
+        }
+        
+        // Import wheelchair activity
+        if let wheelchair = bundle.wheelchairActivity, !wheelchair.isEmpty {
+            importStatus = "Importing wheelchair activity..."
+            try await importWheelchairSamples(wheelchair)
+            processedSamples += wheelchair.count
+            importProgress = Double(processedSamples) / Double(totalSamples)
+        }
+        
+        // Import exercise time (Note: appleExerciseTime is read-only, skip import)
+        if let exercise = bundle.exerciseTime, !exercise.isEmpty {
+            importStatus = "Skipping exercise time (read-only)..."
+            // Cannot import appleExerciseTime as it's calculated by Apple
+            processedSamples += exercise.count
+            importProgress = Double(processedSamples) / Double(totalSamples)
+        }
+        
+        // Import body temperature
+        if let bodyTemp = bundle.bodyTemperature, !bodyTemp.isEmpty {
+            importStatus = "Importing body temperature..."
+            try await importBodyTemperatureSamples(bodyTemp)
+            processedSamples += bodyTemp.count
+            importProgress = Double(processedSamples) / Double(totalSamples)
+        }
+        
+        // Import menstrual flow
+        if let menstrual = bundle.menstrualFlow, !menstrual.isEmpty {
+            importStatus = "Importing menstrual flow data..."
+            try await importMenstrualFlowSamples(menstrual)
+            processedSamples += menstrual.count
             importProgress = Double(processedSamples) / Double(totalSamples)
         }
     }
@@ -661,6 +821,90 @@ class HealthDataExporter: ObservableObject {
         // Skin temperature is read-only in HealthKit, cannot be imported
         // This function is kept for compatibility but does nothing
         return
+    }
+    
+    private func importWheelchairSamples(_ samples: [WheelchairActivitySample]) async throws {
+        let pushType = HKQuantityType.quantityType(forIdentifier: .pushCount)!
+        let pushUnit = HKUnit.count()
+        
+        let pushSamples = samples.map { sample in
+            let quantity = HKQuantity(unit: pushUnit, doubleValue: sample.pushCount)
+            return HKQuantitySample(
+                type: pushType,
+                quantity: quantity,
+                start: sample.date,
+                end: sample.endDate
+            )
+        }
+        
+        try await saveSamples(pushSamples)
+        
+        // Import distance if available
+        let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWheelchair)!
+        let distanceUnit = HKUnit.meter()
+        
+        let distanceSamples = samples.compactMap { sample -> HKQuantitySample? in
+            guard let distance = sample.distance else { return nil }
+            let quantity = HKQuantity(unit: distanceUnit, doubleValue: distance)
+            return HKQuantitySample(
+                type: distanceType,
+                quantity: quantity,
+                start: sample.date,
+                end: sample.endDate
+            )
+        }
+        
+        if !distanceSamples.isEmpty {
+            try await saveSamples(distanceSamples)
+        }
+    }
+    
+    private func importExerciseTimeSamples(_ samples: [ExerciseTimeSample]) async throws {
+        // appleExerciseTime is read-only in HealthKit - it's calculated automatically by Apple
+        // based on movement and heart rate data. We cannot write to it directly.
+        // This method is kept for compatibility but does nothing.
+        return
+    }
+    
+    private func importBodyTemperatureSamples(_ samples: [BodyTemperatureSample]) async throws {
+        let type = HKQuantityType.quantityType(forIdentifier: .bodyTemperature)!
+        let unit = HKUnit.degreeCelsius()
+        
+        let hkSamples = samples.map { sample in
+            let quantity = HKQuantity(unit: unit, doubleValue: sample.value)
+            return HKQuantitySample(
+                type: type,
+                quantity: quantity,
+                start: sample.date,
+                end: sample.date
+            )
+        }
+        
+        try await saveSamples(hkSamples)
+    }
+    
+    private func importMenstrualFlowSamples(_ samples: [MenstrualFlowSample]) async throws {
+        let type = HKCategoryType.categoryType(forIdentifier: .menstrualFlow)!
+        
+        let hkSamples = samples.compactMap { sample -> HKCategorySample? in
+            let value: HKCategoryValueMenstrualFlow
+            switch sample.flowLevel {
+            case .unspecified: value = .unspecified
+            case .light: value = .light
+            case .medium: value = .medium
+            case .heavy: value = .heavy
+            case .none: value = .none
+            }
+            
+            return HKCategorySample(
+                type: type,
+                value: value.rawValue,
+                start: sample.date,
+                end: sample.endDate
+            )
+        }
+        
+        try await saveSamples(hkSamples)
     }
     
     private func saveSample(_ sample: HKSample) async throws {

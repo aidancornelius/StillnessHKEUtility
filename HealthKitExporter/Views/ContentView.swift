@@ -14,7 +14,20 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            if exportManager.isSimulator {
+            if exportManager.overrideModeEnabled {
+                // Show both export and import when override is enabled
+                ExportView()
+                    .tabItem {
+                        Label("Export", systemImage: "square.and.arrow.up")
+                    }
+                    .tag(0)
+                
+                ImportView()
+                    .tabItem {
+                        Label("Import", systemImage: "square.and.arrow.down")
+                    }
+                    .tag(1)
+            } else if exportManager.isSimulator {
                 // Show import view in simulator
                 ImportView()
                     .tabItem {
@@ -34,27 +47,27 @@ struct ContentView: View {
                 .tabItem {
                     Label("Generate", systemImage: "waveform.path")
                 }
-                .tag(1)
+                .tag(exportManager.overrideModeEnabled ? 2 : 1)
             
-            if exportManager.isSimulator {
+            if exportManager.isSimulator || exportManager.overrideModeEnabled {
                 LiveStreamView()
                     .tabItem {
                         Label("Live generate", systemImage: "dot.radiowaves.left.and.right")
                     }
-                    .tag(2)
+                    .tag(exportManager.overrideModeEnabled ? 3 : 2)
             }
             
             NetworkStreamView(liveStreamManager: liveStreamManager)
                 .tabItem {
                     Label("Network stream", systemImage: "wifi.router")
                 }
-                .tag(exportManager.isSimulator ? 3 : 2)
+                .tag(exportManager.overrideModeEnabled ? 4 : (exportManager.isSimulator ? 3 : 2))
             
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Label("Settings", systemImage: exportManager.overrideModeEnabled ? "exclamationmark.gear" : "gear")
                 }
-                .tag(exportManager.isSimulator ? 4 : 3)
+                .tag(exportManager.overrideModeEnabled ? 5 : (exportManager.isSimulator ? 4 : 3))
         }
         .task {
             if !exportManager.isAuthorized {
@@ -77,9 +90,20 @@ struct ImportView: View {
         NavigationStack {
             Form {
                 Section("Import health data") {
-                    Text("Running in simulator")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if exportManager.overrideModeEnabled {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.red)
+                            Text("Override mode active - Running on \(exportManager.actualPlatform)")
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                        }
+                        .padding(.vertical, 4)
+                    } else {
+                        Text("Running in simulator")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     
                     Text("Import JSON files to populate the simulator's HealthKit database with test data.")
                         .font(.subheadline)
@@ -219,17 +243,39 @@ struct GeneratorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Source data") {
-                    if let bundle = exportManager.lastExportedBundle {
-                        HStack {
-                            Label("\(bundle.sampleCount) samples", systemImage: "chart.line.uptrend.xyaxis")
-                            Spacer()
-                            Text(bundle.exportDate, style: .date)
+                if exportManager.selectedManipulation == .keepOriginal {
+                    Section("Source data") {
+                        if let bundle = exportManager.lastExportedBundle {
+                            HStack {
+                                Label("\(bundle.sampleCount) samples", systemImage: "chart.line.uptrend.xyaxis")
+                                Spacer()
+                                Text(bundle.exportDate, style: .date)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Button(action: { showingFilePicker = true }) {
+                                Label("Load different file", systemImage: "doc.badge.arrow.up")
+                            }
+                        } else {
+                            Text("Load exported data to apply patterns")
+                                .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                            Button(action: { showingFilePicker = true }) {
+                                Label("Load JSON file", systemImage: "doc.badge.arrow.up")
+                            }
                         }
-                    } else {
-                        Button(action: { showingFilePicker = true }) {
-                            Label("Load exported data", systemImage: "doc.badge.arrow.up")
+                    }
+                } else {
+                    Section("Source data") {
+                        HStack {
+                            Image(systemName: "sparkles")
+                                .foregroundStyle(.blue)
+                            Text("Generating synthetic data")
+                                .font(.subheadline)
+                        }
+                        if let bundle = exportManager.lastExportedBundle {
+                            Text("\(bundle.sampleCount) samples available for reference")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -239,19 +285,43 @@ struct GeneratorView: View {
                     DatePicker("End date", selection: $exportManager.targetEndDate, displayedComponents: [.date, .hourAndMinute])
                 }
                 
-                Section("Pattern generation") {
-                    Picker("Pattern type", selection: $exportManager.selectedPattern) {
-                        ForEach(PatternType.allCases, id: \.self) { pattern in
+                Section("Generation mode") {
+                    Picker("Stress preset", selection: $exportManager.selectedPreset) {
+                        ForEach(GenerationPreset.allCases, id: \.self) { preset in
                             VStack(alignment: .leading) {
-                                Text(pattern.rawValue)
-                                Text(pattern.description)
+                                Text(preset.rawValue)
+                                    .foregroundStyle(preset == .edgeCases ? .orange : .primary)
+                                Text(preset.description)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
-                            .tag(pattern)
+                            .tag(preset)
                         }
                     }
                     .pickerStyle(.menu)
+                    
+                    Picker("Data manipulation", selection: $exportManager.selectedManipulation) {
+                        ForEach(DataManipulation.allCases, id: \.self) { manipulation in
+                            VStack(alignment: .leading) {
+                                Text(manipulation.rawValue)
+                                Text(manipulation.description)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .tag(manipulation)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    
+                    if exportManager.selectedManipulation == .keepOriginal && exportManager.lastExportedBundle != nil {
+                        Picker("Pattern type", selection: $exportManager.selectedPattern) {
+                            ForEach(PatternType.allCases, id: \.self) { pattern in
+                                Text(pattern.rawValue)
+                                    .tag(pattern)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
                     
                     Stepper("Random seed: \(exportManager.patternSeed)", value: $exportManager.patternSeed, in: 0...100)
                 }
@@ -269,7 +339,8 @@ struct GeneratorView: View {
                             Label("Generate test data", systemImage: "sparkles")
                         }
                     }
-                    .disabled(exportManager.lastExportedBundle == nil || exportManager.isGenerating)
+                    .disabled(exportManager.isGenerating || 
+                             (exportManager.selectedManipulation == .keepOriginal && exportManager.lastExportedBundle == nil))
                     
                     if let generated = generatedBundle {
                         Button(action: { showingExporter = true }) {
@@ -329,10 +400,15 @@ struct GeneratorView: View {
     }
     
     private func generateData() {
-        guard let sourceBundle = exportManager.lastExportedBundle else { return }
-        
         Task {
-            generatedBundle = await exportManager.generateTransformedData(from: sourceBundle)
+            if exportManager.selectedManipulation == .keepOriginal && exportManager.lastExportedBundle != nil {
+                // Use existing data with transformation
+                guard let sourceBundle = exportManager.lastExportedBundle else { return }
+                generatedBundle = await exportManager.generateTransformedData(from: sourceBundle)
+            } else {
+                // Generate synthetic data
+                generatedBundle = await exportManager.generateSyntheticData()
+            }
         }
     }
 }
@@ -343,6 +419,8 @@ struct SettingsView: View {
     @EnvironmentObject var exportManager: ExportManager
     @AppStorage("defaultDaysToExport") private var defaultDaysToExport = 7
     @AppStorage("includeEnhancedMetrics") private var includeEnhancedMetrics = true
+    @State private var showingOverrideConfirmation = false
+    @State private var pendingOverrideState = false
     
     var body: some View {
         NavigationStack {
@@ -352,9 +430,52 @@ struct SettingsView: View {
                     Toggle("Include enhanced metrics", isOn: $includeEnhancedMetrics)
                 }
                 
+                Section("Development override") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.red)
+                                .font(.title2)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Override mode")
+                                    .font(.headline)
+                                    .foregroundStyle(.red)
+                                Text("Enable all features on \(exportManager.actualPlatform)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                        
+                        Text("⚠️ WARNING: This override allows export and import functionality on both simulator and physical device. Use with extreme caution.")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                        
+                        Toggle(isOn: Binding(
+                            get: { exportManager.overrideModeEnabled },
+                            set: { newValue in
+                                pendingOverrideState = newValue
+                                showingOverrideConfirmation = true
+                            }
+                        )) {
+                            Text(exportManager.overrideModeEnabled ? "Override ACTIVE" : "Override disabled")
+                                .foregroundStyle(exportManager.overrideModeEnabled ? .red : .primary)
+                                .fontWeight(exportManager.overrideModeEnabled ? .bold : .regular)
+                        }
+                        .tint(.red)
+                    }
+                    .padding(.vertical, 8)
+                }
+                .listRowBackground(Color.red.opacity(0.05))
+                
                 Section("About") {
-                    LabeledContent("Version", value: "1.0.0")
+                    LabeledContent("Version", value: "1.1")
                     LabeledContent("Purpose", value: "Development testing")
+                    LabeledContent("Platform", value: exportManager.actualPlatform)
+                    if exportManager.overrideModeEnabled {
+                        Label("Override mode active", systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.red)
+                    }
                     
                     Link(destination: URL(string: "https://github.com/aidancornelius/StillnessHKEUtility")!) {
                         Label("View source", systemImage: "chevron.left.forwardslash.chevron.right")
@@ -370,6 +491,20 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .alert("Enable override mode?", isPresented: $showingOverrideConfirmation) {
+                Button("Cancel", role: .cancel) {
+                    // Keep the current state
+                }
+                Button("Enable override", role: .destructive) {
+                    exportManager.overrideModeEnabled = pendingOverrideState
+                }
+            } message: {
+                if pendingOverrideState {
+                    Text("This will enable ALL features (export and import) on \(exportManager.actualPlatform). This is intended for development only and may cause unexpected behavior.\n\nAre you absolutely sure?")
+                } else {
+                    Text("Disable override mode and return to normal platform-specific behavior?")
+                }
+            }
         }
     }
 }

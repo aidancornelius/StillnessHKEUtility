@@ -21,6 +21,9 @@ class ExportManager: ObservableObject {
     @Published var lastExportedBundle: ExportedHealthBundle?
     @Published var isGenerating = false
     @Published var generationProgress: Double = 0
+    @Published var overrideModeEnabled = false
+    @Published var selectedPreset: GenerationPreset = .normal
+    @Published var selectedManipulation: DataManipulation = .keepOriginal
     
     private let exporter = HealthDataExporter()
     
@@ -41,7 +44,12 @@ class ExportManager: ObservableObject {
     }
     
     var isSimulator: Bool {
-        exporter.isSimulator
+        // Return actual platform unless override is enabled
+        overrideModeEnabled ? false : exporter.isSimulator
+    }
+    
+    var actualPlatform: String {
+        exporter.isSimulator ? "Simulator" : "Physical Device"
     }
     
     var isImporting: Bool {
@@ -79,6 +87,27 @@ class ExportManager: ObservableObject {
     
     func importData(_ bundle: ExportedHealthBundle) async throws {
         try await exporter.importData(bundle)
+    }
+    
+    // MARK: - Generate Synthetic Data
+    
+    func generateSyntheticData() async -> ExportedHealthBundle {
+        isGenerating = true
+        generationProgress = 0
+        
+        defer {
+            isGenerating = false
+            generationProgress = 1.0
+        }
+        
+        return SyntheticDataGenerator.generateHealthData(
+            preset: selectedPreset,
+            manipulation: selectedManipulation,
+            startDate: targetStartDate,
+            endDate: targetEndDate,
+            existingBundle: lastExportedBundle,
+            seed: patternSeed
+        )
     }
     
     // MARK: - Generate Transformed Data
@@ -196,6 +225,43 @@ class ExportManager: ObservableObject {
             )
         }
         
+        // Transform new data types
+        let transformedWheelchairActivity = bundle.wheelchairActivity?.map { sample in
+            WheelchairActivitySample(
+                date: transformation.transform(sample.date),
+                endDate: transformation.transform(sample.endDate),
+                pushCount: applyPatternToValue(sample.pushCount, baseValue: 100, pattern: selectedPattern),
+                distance: sample.distance.map { applyPatternToValue($0, baseValue: 500, pattern: selectedPattern) },
+                source: sample.source
+            )
+        }
+        
+        let transformedExerciseTime = bundle.exerciseTime?.map { sample in
+            ExerciseTimeSample(
+                date: transformation.transform(sample.date),
+                endDate: transformation.transform(sample.endDate),
+                minutes: applyPatternToValue(sample.minutes, baseValue: 30, pattern: selectedPattern),
+                source: sample.source
+            )
+        }
+        
+        let transformedBodyTemperature = bundle.bodyTemperature?.map { sample in
+            BodyTemperatureSample(
+                date: transformation.transform(sample.date),
+                value: applyPatternToValue(sample.value, baseValue: 37.0, pattern: selectedPattern),
+                source: sample.source
+            )
+        }
+        
+        let transformedMenstrualFlow = bundle.menstrualFlow?.map { sample in
+            MenstrualFlowSample(
+                date: transformation.transform(sample.date),
+                endDate: transformation.transform(sample.endDate),
+                flowLevel: sample.flowLevel, // Keep flow level as-is
+                source: sample.source
+            )
+        }
+        
         return ExportedHealthBundle(
             exportDate: Date(),
             startDate: targetStartDate,
@@ -208,7 +274,11 @@ class ExportManager: ObservableObject {
             restingHeartRate: bundle.restingHeartRate,
             respiratoryRate: transformedRespiratoryRate,
             bloodOxygen: transformedBloodOxygen,
-            skinTemperature: transformedSkinTemperature
+            skinTemperature: transformedSkinTemperature,
+            wheelchairActivity: transformedWheelchairActivity,
+            exerciseTime: transformedExerciseTime,
+            bodyTemperature: transformedBodyTemperature,
+            menstrualFlow: transformedMenstrualFlow
         )
     }
     

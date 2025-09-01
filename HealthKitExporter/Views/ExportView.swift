@@ -16,6 +16,25 @@ struct ExportView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if exportManager.overrideModeEnabled {
+                    Section {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.red)
+                            VStack(alignment: .leading) {
+                                Text("Override mode active")
+                                    .font(.headline)
+                                    .foregroundStyle(.red)
+                                Text("Running on \(exportManager.actualPlatform)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .listRowBackground(Color.red.opacity(0.1))
+                }
+                
                 Section("Date range") {
                     DateRangePickerView(
                         startDate: $exportManager.sourceStartDate,
