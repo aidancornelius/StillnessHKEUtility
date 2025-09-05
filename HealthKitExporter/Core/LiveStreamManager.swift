@@ -634,6 +634,7 @@ class LiveStreamManager: ObservableObject {
 
 enum StreamingScenario: String, CaseIterable {
     case normal = "Normal patterns"
+    case lowStress = "Low stress"
     case stress = "Stress scenario" 
     case extreme = "Extreme events"
     case edgeCases = "Edge cases"
@@ -644,6 +645,8 @@ enum StreamingScenario: String, CaseIterable {
         switch self {
         case .normal:
             return "Realistic daily variations with circadian rhythms"
+        case .lowStress:
+            return "Relaxed state, higher HRV, lower heart rate"
         case .stress:
             return "Elevated heart rate, reduced HRV, simulating stress"
         case .extreme:
@@ -664,6 +667,12 @@ enum StreamingScenario: String, CaseIterable {
         case .normal:
             let variation = Double.random(in: -5...5, using: &rng)
             return max(40, min(180, baseline + variation))
+            
+        case .lowStress:
+            // Lower heart rate for relaxed state
+            let relaxDecrease = Double.random(in: 5...15, using: &rng)
+            let variation = Double.random(in: -2...2, using: &rng)
+            return max(45, min(100, baseline - relaxDecrease + variation))
             
         case .stress:
             let stressIncrease = Double.random(in: 15...35, using: &rng)
@@ -705,6 +714,12 @@ enum StreamingScenario: String, CaseIterable {
         case .normal:
             let variation = Double.random(in: -8...8, using: &rng)
             return max(10, min(100, baseline + variation))
+            
+        case .lowStress:
+            // Higher HRV indicates relaxation and low stress
+            let relaxIncrease = Double.random(in: 15...30, using: &rng)
+            let variation = Double.random(in: -3...5, using: &rng)
+            return max(20, min(150, baseline + relaxIncrease + variation))
             
         case .stress:
             // Lower HRV indicates stress

@@ -23,7 +23,7 @@ class ExportManager: ObservableObject {
     @Published var generationProgress: Double = 0
     @Published var overrideModeEnabled = false
     @Published var selectedPreset: GenerationPreset = .normal
-    @Published var selectedManipulation: DataManipulation = .keepOriginal
+    @Published var selectedManipulation: DataManipulation = .smoothReplace
     
     private let exporter = HealthDataExporter()
     
@@ -87,6 +87,146 @@ class ExportManager: ObservableObject {
     
     func importData(_ bundle: ExportedHealthBundle) async throws {
         try await exporter.importData(bundle)
+    }
+    
+    func transposeBundleDatesToToday(_ bundle: ExportedHealthBundle) -> ExportedHealthBundle {
+        let originalDuration = bundle.endDate.timeIntervalSince(bundle.startDate)
+        let newEndDate = Date()
+        let newStartDate = newEndDate.addingTimeInterval(-originalDuration)
+        
+        // Calculate time offset to apply to all dates
+        let timeOffset = newEndDate.timeIntervalSince(bundle.endDate)
+        
+        // Helper function to transpose a date
+        func transposeDate(_ date: Date) -> Date {
+            return date.addingTimeInterval(timeOffset)
+        }
+        
+        // Transpose all samples
+        let transposedHeartRate = bundle.heartRate.map { sample in
+            HeartRateSample(
+                date: transposeDate(sample.date),
+                value: sample.value,
+                source: sample.source
+            )
+        }
+        
+        let transposedHRV = bundle.hrv.map { sample in
+            HRVSample(
+                date: transposeDate(sample.date),
+                value: sample.value,
+                source: sample.source
+            )
+        }
+        
+        let transposedActivity = bundle.activity.map { sample in
+            ActivitySample(
+                date: transposeDate(sample.date),
+                endDate: transposeDate(sample.endDate),
+                stepCount: sample.stepCount,
+                distance: sample.distance,
+                activeCalories: sample.activeCalories,
+                source: sample.source
+            )
+        }
+        
+        let transposedSleep = bundle.sleep.map { sample in
+            SleepSample(
+                startDate: transposeDate(sample.startDate),
+                endDate: transposeDate(sample.endDate),
+                stage: sample.stage,
+                source: sample.source
+            )
+        }
+        
+        let transposedWorkouts = bundle.workouts.map { workout in
+            WorkoutSample(
+                startDate: transposeDate(workout.startDate),
+                endDate: transposeDate(workout.endDate),
+                type: workout.type,
+                calories: workout.calories,
+                distance: workout.distance,
+                averageHeartRate: workout.averageHeartRate,
+                source: workout.source
+            )
+        }
+        
+        // Transpose optional arrays
+        let transposedRespiratory = bundle.respiratoryRate?.map { sample in
+            RespiratorySample(
+                date: transposeDate(sample.date),
+                value: sample.value
+            )
+        }
+        
+        let transposedOxygen = bundle.bloodOxygen?.map { sample in
+            OxygenSample(
+                date: transposeDate(sample.date),
+                value: sample.value
+            )
+        }
+        
+        let transposedTemperature = bundle.skinTemperature?.map { sample in
+            TemperatureSample(
+                date: transposeDate(sample.date),
+                value: sample.value
+            )
+        }
+        
+        let transposedWheelchair = bundle.wheelchairActivity?.map { sample in
+            WheelchairActivitySample(
+                date: transposeDate(sample.date),
+                endDate: transposeDate(sample.endDate),
+                pushCount: sample.pushCount,
+                distance: sample.distance,
+                source: sample.source
+            )
+        }
+        
+        let transposedExercise = bundle.exerciseTime?.map { sample in
+            ExerciseTimeSample(
+                date: transposeDate(sample.date),
+                endDate: transposeDate(sample.endDate),
+                minutes: sample.minutes,
+                source: sample.source
+            )
+        }
+        
+        let transposedBodyTemp = bundle.bodyTemperature?.map { sample in
+            BodyTemperatureSample(
+                date: transposeDate(sample.date),
+                value: sample.value,
+                source: sample.source
+            )
+        }
+        
+        let transposedMenstrual = bundle.menstrualFlow?.map { sample in
+            MenstrualFlowSample(
+                date: transposeDate(sample.date),
+                endDate: transposeDate(sample.endDate),
+                flowLevel: sample.flowLevel,
+                source: sample.source
+            )
+        }
+        
+        return ExportedHealthBundle(
+            exportDate: Date(),
+            startDate: newStartDate,
+            endDate: newEndDate,
+            heartRate: transposedHeartRate,
+            hrv: transposedHRV,
+            activity: transposedActivity,
+            sleep: transposedSleep,
+            workouts: transposedWorkouts,
+            restingHeartRate: bundle.restingHeartRate,
+            respiratoryRate: transposedRespiratory,
+            bloodOxygen: transposedOxygen,
+            skinTemperature: transposedTemperature,
+            wheelchairActivity: transposedWheelchair,
+            exerciseTime: transposedExercise,
+            bodyTemperature: transposedBodyTemp,
+            menstrualFlow: transposedMenstrual
+        )
     }
     
     // MARK: - Generate Synthetic Data

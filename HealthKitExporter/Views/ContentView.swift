@@ -85,6 +85,7 @@ struct ImportView: View {
     @State private var loadedBundle: ExportedHealthBundle?
     @State private var errorMessage: String?
     @State private var importSuccessful = false
+    @State private var transposeDatesToToday = true
     
     var body: some View {
         NavigationStack {
@@ -149,6 +150,49 @@ struct ImportView: View {
                         }
                         if !bundle.workouts.isEmpty {
                             LabeledContent("Workouts", value: "\(bundle.workouts.count)")
+                        }
+                    }
+                    
+                    Section("Date adjustment") {
+                        Toggle("Transpose dates to end today", isOn: $transposeDatesToToday)
+                        
+                        if transposeDatesToToday {
+                            let duration = bundle.endDate.timeIntervalSince(bundle.startDate)
+                            let newStartDate = Date().addingTimeInterval(-duration)
+                            let newEndDate = Date()
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Image(systemName: "calendar.badge.clock")
+                                        .foregroundStyle(.blue)
+                                    Text("Dates will be shifted")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text("Original:")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                        Text("\(bundle.startDate, style: .date) → \(bundle.endDate, style: .date)")
+                                            .font(.caption)
+                                    }
+                                    
+                                    HStack {
+                                        Text("New:")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                        Text("\(newStartDate, style: .date) → \(newEndDate, style: .date)")
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                    }
+                                }
+                                
+                                Text("All data timestamps will be adjusted to maintain relative timing")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                     
@@ -220,7 +264,13 @@ struct ImportView: View {
         importSuccessful = false
         Task {
             do {
-                try await exportManager.importData(bundle)
+                let bundleToImport: ExportedHealthBundle
+                if transposeDatesToToday {
+                    bundleToImport = exportManager.transposeBundleDatesToToday(bundle)
+                } else {
+                    bundleToImport = bundle
+                }
+                try await exportManager.importData(bundleToImport)
                 importSuccessful = true
                 errorMessage = nil
             } catch {
@@ -243,8 +293,22 @@ struct GeneratorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                if exportManager.selectedManipulation == .keepOriginal {
-                    Section("Source data") {
+                Section("Data source") {
+                    Picker("Generation mode", selection: $exportManager.selectedManipulation) {
+                        ForEach(DataManipulation.allCases, id: \.self) { manipulation in
+                            VStack(alignment: .leading) {
+                                Text(manipulation.rawValue)
+                                Text(manipulation.description)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .tag(manipulation)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    
+                    switch exportManager.selectedManipulation {
+                    case .keepOriginal:
                         if let bundle = exportManager.lastExportedBundle {
                             HStack {
                                 Label("\(bundle.sampleCount) samples", systemImage: "chart.line.uptrend.xyaxis")
@@ -256,24 +320,67 @@ struct GeneratorView: View {
                                 Label("Load different file", systemImage: "doc.badge.arrow.up")
                             }
                         } else {
-                            Text("Load exported data to apply patterns")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Label("Sample file required", systemImage: "exclamationmark.triangle")
+                                    .foregroundStyle(.orange)
+                                Text("Load exported data to apply transformation patterns")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                             Button(action: { showingFilePicker = true }) {
                                 Label("Load JSON file", systemImage: "doc.badge.arrow.up")
                             }
                         }
-                    }
-                } else {
-                    Section("Source data") {
-                        HStack {
-                            Image(systemName: "sparkles")
-                                .foregroundStyle(.blue)
-                            Text("Generating synthetic data")
-                                .font(.subheadline)
+                        
+                    case .smoothReplace:
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "sparkles")
+                                    .foregroundStyle(.blue)
+                                Text("Synthetic generation")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                            }
+                            Text("Creates new health data with realistic patterns - no sample file needed")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        if let bundle = exportManager.lastExportedBundle {
-                            Text("\(bundle.sampleCount) samples available for reference")
+                        
+                    case .generateMissing:
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "plus.circle")
+                                    .foregroundStyle(.green)
+                                Text("Fill gaps")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                            }
+                            if let bundle = exportManager.lastExportedBundle {
+                                Text("Will add data for empty categories in loaded file (\(bundle.sampleCount) samples)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("Will generate complete dataset if no file is loaded")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        if exportManager.lastExportedBundle == nil {
+                            Button(action: { showingFilePicker = true }) {
+                                Label("Load file (optional)", systemImage: "doc.badge.arrow.up")
+                            }
+                        }
+                        
+                    case .accessibilityMode:
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "figure.roll")
+                                    .foregroundStyle(.purple)
+                                Text("Accessibility mode")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                            }
+                            Text("Converts step data to wheelchair pushes for accessibility testing")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -285,7 +392,7 @@ struct GeneratorView: View {
                     DatePicker("End date", selection: $exportManager.targetEndDate, displayedComponents: [.date, .hourAndMinute])
                 }
                 
-                Section("Generation mode") {
+                Section("Generation settings") {
                     Picker("Stress preset", selection: $exportManager.selectedPreset) {
                         ForEach(GenerationPreset.allCases, id: \.self) { preset in
                             VStack(alignment: .leading) {
@@ -296,19 +403,6 @@ struct GeneratorView: View {
                                     .foregroundStyle(.secondary)
                             }
                             .tag(preset)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    
-                    Picker("Data manipulation", selection: $exportManager.selectedManipulation) {
-                        ForEach(DataManipulation.allCases, id: \.self) { manipulation in
-                            VStack(alignment: .leading) {
-                                Text(manipulation.rawValue)
-                                Text(manipulation.description)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .tag(manipulation)
                         }
                     }
                     .pickerStyle(.menu)
