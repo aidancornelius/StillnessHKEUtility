@@ -30,7 +30,7 @@ reproducible test scenarios.
 
 Continuously generates health data in real-time, simulating ongoing sensor readings. Choose scenarios like exercise, sleep, or stress tests, with data generated at configurable intervals. Automatically broadcasts to connected simulators over the network and includes safety limits to prevent runaway generation.
 
-Networkstream
+### Networkstream
 
 Enables real-time streaming between physical devices and simulators over local network. Devices broadcast live health data that simulators can discover and receive. Includes HealthKit verification to confirm data is properly saved, recent sample display, and connection statistics. Handles local network permissions on devices.
 
