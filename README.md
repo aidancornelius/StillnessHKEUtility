@@ -2,7 +2,7 @@
 
 A tool app that exports real HealthKit data (heart rate, steps, sleep, workouts, etc.) from your physical iPhone, and paired Apple Watch into a JSON file, then imports that data into the iOS Simulator's HealthKit store. It can also generate synthetic health data patterns based on real samples.
 
-Why you'd need it: When developing health apps like Stillness, you can't test with realistic data in the Simulator since it lacks real sensors. This tool lets you capture your actual health metrics from your devices and use them in the Simulator for development and testing, ensuring your app handles real-world data correctly before deployment.
+Useful when developing health apps you can't test with realistic data in the Simulator since it lacks real sensors. This tool lets you capture your actual health metrics from your devices and use them in the Simulator for development and testing, ensuring your app handles real-world-ish data correctly before deployment (good for automated testing).
 
 ## Features
 
