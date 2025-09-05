@@ -1,33 +1,38 @@
 # HealthKit Exporter
 
-A tool app for Stillness that exports, transforms, and imports HealthKit data for testing purposes.
+A tool app that exports real HealthKit data (heart rate, steps, sleep, workouts, etc.) from your physical iPhone, and paired Apple Watch into a JSON file, then imports that data into the iOS Simulator's HealthKit store. It can also generate synthetic health data patterns based on real samples.
+
+Why you'd need it: When developing health apps like Stillness, you can't test with realistic data in the Simulator since it lacks real sensors. This tool lets you capture your actual health metrics from your devices and use them in the Simulator for development and testing, ensuring your app handles real-world data correctly before deployment.
 
 ## Features
 
 The app basically does what it says on the tin:
 
-### Real device mode
-When running on a physical device with HK data:
-- Export heart rate, HRV, activity, sleep, workouts, and enhanced metrics
-- Select custom date ranges or use quick presets
-- Export to JSON format for use in simulator testing
+Adjusts available tabs based on whether you're running on a physical device or simulator. 
+  - On devices, you see Export,Generate, Network Stream, and Settings tabs. 
+  - On simulators, you get Import instead of Export, plus Live Generate for continuous data generation.
+  - An override mode allows all features on any platform for development testing.
 
-### Simulator mode
-When running in the simulator:
-- Import JSON files directly into simulator's HealthKit database ('Share' the JSON file to the simulator)
-- Populate simulator with real device data for testing (you may need to ask it twice, for some reason)
-- Preview data before importing
-- Real-time import progress
+### Export
 
-### Generate test patterns (largely useless) 
-- Transform data to different date ranges (e.g., 2022 data → 2025)
-- Apply pattern modifications:
-  - Similar pattern: Minor variations
-  - Amplified: Increase stress levels by 20-40%
-  - Reduced: Decrease stress levels by 20-40%
-  - Inverted: Flip high and low stress periods
-  - Random: Add random variations
-- Seed-based generation for reproducible results (ha)
+Extracts real HealthKit data from your physical iPhone/Apple Watch/etc. You select a date range (with quick presets like "Last 7 days"), choose which health metrics to include, then export everything to a JSON file. Shows a summary of collected samples before saving.
+
+### Import
+
+Loads previously exported JSON files into the simulator's HealthKit database. Features automatic date transposition to make historical data appear recent, perfect for testing current date scenarios. Shows preview of data categories and sample counts before importing.
+
+### Generator
+
+Creates synthetic health data based on patterns and presets. Can transform existing data with patterns (stable, trending, spiky) or generate new datasets. Includes stress presets, and modes like wheelchair testing. Uses seeded randomisation for
+reproducible test scenarios.
+
+### Livestream
+
+Continuously generates health data in real-time, simulating ongoing sensor readings. Choose scenarios like exercise, sleep, or stress tests, with data generated at configurable intervals. Automatically broadcasts to connected simulators over the network and includes safety limits to prevent runaway generation.
+
+Networkstream
+
+Enables real-time streaming between physical devices and simulators over local network. Devices broadcast live health data that simulators can discover and receive. Includes HealthKit verification to confirm data is properly saved, recent sample display, and connection statistics. Handles local network permissions on devices.
 
 ## Requirements
 
@@ -40,37 +45,3 @@ When running in the simulator:
 1. Open `HealthKitExporter.xcodeproj` in Xcode
 2. Select your development team in project settings
 3. Run it wherever you like
-
-## Usage
-
-### On a physical device to export data
-
-1. Run app on physical device
-2. Go to "Export data" tab
-3. Select date range
-4. Choose data types to export
-5. Tap "Export from device"
-6. Save the JSON file
-
-### In simulator to import data
-
-1. Run app in simulator
-2. Go to "Import data" tab
-3. Tap "Load JSON file"
-4. Select an exported data file
-5. Review the data preview
-6. Tap "Import to simulator"
-7. Data is now available in simulator's HealthKit
-
-### Generating test data
-
-1. Go to "Generate patterns" tab
-2. Load an exported JSON file or use last export
-3. Set target date range for transformation
-4. Choose pattern type
-5. Tap "Generate test data"
-6. Export the transformed data
-
-## Data format
-
-Exported data follows the same structure as Stillness's internal models, making it easy to import for testing.
