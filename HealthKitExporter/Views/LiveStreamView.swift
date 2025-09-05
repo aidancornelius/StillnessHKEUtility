@@ -71,6 +71,22 @@ struct LiveStreamView: View {
                     .pickerStyle(.menu)
                     .disabled(liveStreamManager.isStreaming)
                     
+                    // Show wheelchair toggle when wheelchair scenario is selected
+                    if liveStreamManager.currentScenario == .wheelchair {
+                        Toggle("Generate wheelchair push data", isOn: $liveStreamManager.generateWheelchairData)
+                            .disabled(liveStreamManager.isStreaming)
+                        
+                        if liveStreamManager.generateWheelchairData {
+                            HStack {
+                                Image(systemName: "figure.roll")
+                                    .foregroundStyle(.purple)
+                                Text("Will generate wheelchair pushes and distance")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    
                     HStack {
                         Text("Interval")
                         Spacer()
@@ -244,6 +260,12 @@ struct LiveStreamView: View {
                 // Use last exported bundle if no source data is loaded
                 if liveStreamManager.sourceBundle == nil {
                     liveStreamManager.sourceBundle = exportManager.lastExportedBundle
+                }
+            }
+            .onChange(of: liveStreamManager.currentScenario) { newScenario in
+                // Automatically enable wheelchair data generation when wheelchair scenario is selected
+                if newScenario == .wheelchair {
+                    liveStreamManager.generateWheelchairData = true
                 }
             }
         }

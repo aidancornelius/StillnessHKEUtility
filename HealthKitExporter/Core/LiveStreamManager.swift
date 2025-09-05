@@ -37,6 +37,7 @@ class LiveStreamManager: ObservableObject {
     @Published var detailedStatus = "Waiting for streaming to start"
     @Published var backgroundProcessingActive = false
     @Published var sourceBundle: ExportedHealthBundle?
+    @Published var generateWheelchairData = false // Track if wheelchair data should be generated
     
     // Network streaming
     @MainActor private lazy var networkManager = NetworkStreamingManager()
@@ -254,13 +255,48 @@ class LiveStreamManager: ObservableObject {
                 try await saveSample(hrvSample)
             }
             
+            // Generate wheelchair data if in wheelchair mode
+            if currentScenario == .wheelchair || generateWheelchairData {
+                if let wheelchairType = HKQuantityType.quantityType(forIdentifier: .pushCount) {
+                    // Generate wheelchair pushes (similar to step count but for wheelchair)
+                    let pushCount = Double.random(in: 50...200) // Pushes per interval
+                    let pushQuantity = HKQuantity(unit: HKUnit.count(), doubleValue: pushCount)
+                    
+                    let wheelchairSample = HKCumulativeQuantitySample(
+                        type: wheelchairType,
+                        quantity: pushQuantity,
+                        start: now.addingTimeInterval(-streamingInterval),
+                        end: now
+                    )
+                    
+                    try await saveSample(wheelchairSample)
+                    
+                    // Also generate wheelchair distance if available
+                    if let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWheelchair) {
+                        let distance = pushCount * Double.random(in: 0.5...1.5) // meters per push
+                        let distanceQuantity = HKQuantity(unit: HKUnit.meter(), doubleValue: distance)
+                        
+                        let distanceSample = HKCumulativeQuantitySample(
+                            type: distanceType,
+                            quantity: distanceQuantity,
+                            start: now.addingTimeInterval(-streamingInterval),
+                            end: now
+                        )
+                        
+                        try await saveSample(distanceSample)
+                    }
+                    
+                    lastGeneratedValues["Pushes"] = pushCount
+                    samplesGeneratedThisHour += 2 // Additional samples for wheelchair
+                    totalSamplesGenerated += 2
+                }
+            }
+            
             // Update tracking
             samplesGeneratedThisHour += 2 // HR + HRV
             totalSamplesGenerated += 2
-            lastGeneratedValues = [
-                "Heart Rate": heartRateValue,
-                "HRV": hrvValue
-            ]
+            lastGeneratedValues["Heart Rate"] = heartRateValue
+            lastGeneratedValues["HRV"] = hrvValue
             
             // Send data over network if connected
             let healthPacket = HealthDataPacket(
@@ -640,6 +676,7 @@ enum StreamingScenario: String, CaseIterable {
     case edgeCases = "Edge cases"
     case workout = "Workout simulation"
     case sleep = "Sleep patterns"
+    case wheelchair = "Wheelchair activity"
     
     var description: String {
         switch self {
@@ -657,6 +694,8 @@ enum StreamingScenario: String, CaseIterable {
             return "Simulate workout periods with elevated metrics"
         case .sleep:
             return "Simulate sleep patterns with recovery metrics"
+        case .wheelchair:
+            return "Wheelchair push patterns with appropriate HR/HRV"
         }
     }
     
@@ -704,6 +743,12 @@ enum StreamingScenario: String, CaseIterable {
             let sleepDecrease = Double.random(in: 10...25, using: &rng)
             let variation = Double.random(in: -3...3, using: &rng)
             return max(40, min(90, baseline - sleepDecrease + variation))
+            
+        case .wheelchair:
+            // Moderate increase for wheelchair activity (less than walking but still active)
+            let wheelchairIncrease = Double.random(in: 10...30, using: &rng)
+            let variation = Double.random(in: -4...8, using: &rng)
+            return max(60, min(150, baseline + wheelchairIncrease + variation))
         }
     }
     
@@ -751,6 +796,12 @@ enum StreamingScenario: String, CaseIterable {
             let sleepIncrease = Double.random(in: 10...25, using: &rng)
             let variation = Double.random(in: -3...8, using: &rng)
             return max(15, min(120, baseline + sleepIncrease + variation))
+            
+        case .wheelchair:
+            // Moderate reduction in HRV during wheelchair activity
+            let wheelchairReduction = Double.random(in: 5...15, using: &rng)
+            let variation = Double.random(in: -4...4, using: &rng)
+            return max(15, min(80, baseline - wheelchairReduction + variation))
         }
     }
 }
