@@ -94,6 +94,7 @@ struct MenstrualFlowSample: Codable {
     let date: Date
     let endDate: Date
     let flowLevel: MenstrualFlowLevel
+    let isCycleStart: Bool
     let source: String
 }
 
@@ -437,7 +438,8 @@ struct SyntheticDataGenerator {
         startDate: Date,
         endDate: Date,
         existingBundle: ExportedHealthBundle? = nil,
-        seed: Int = 0
+        seed: Int = 0,
+        includeMenstrualData: Bool = false
     ) -> ExportedHealthBundle {
         var rng = SeededRandomGenerator(seed: seed)
         let calendar = Calendar.current
@@ -446,16 +448,16 @@ struct SyntheticDataGenerator {
         // Generate or modify data based on manipulation type
         switch manipulation {
         case .keepOriginal:
-            return existingBundle ?? generateCompleteBundle(preset: preset, startDate: startDate, endDate: endDate, rng: &rng)
+            return existingBundle ?? generateCompleteBundle(preset: preset, startDate: startDate, endDate: endDate, includeMenstrualData: includeMenstrualData, rng: &rng)
             
         case .generateMissing:
-            return fillMissingData(in: existingBundle, preset: preset, startDate: startDate, endDate: endDate, rng: &rng)
+            return fillMissingData(in: existingBundle, preset: preset, startDate: startDate, endDate: endDate, includeMenstrualData: includeMenstrualData, rng: &rng)
             
         case .smoothReplace:
-            return generateCompleteBundle(preset: preset, startDate: startDate, endDate: endDate, rng: &rng)
+            return generateCompleteBundle(preset: preset, startDate: startDate, endDate: endDate, includeMenstrualData: includeMenstrualData, rng: &rng)
             
         case .accessibilityMode:
-            return generateAccessibilityBundle(preset: preset, startDate: startDate, endDate: endDate, existingBundle: existingBundle, rng: &rng)
+            return generateAccessibilityBundle(preset: preset, startDate: startDate, endDate: endDate, existingBundle: existingBundle, includeMenstrualData: includeMenstrualData, rng: &rng)
         }
     }
     
@@ -463,6 +465,7 @@ struct SyntheticDataGenerator {
         preset: GenerationPreset,
         startDate: Date,
         endDate: Date,
+        includeMenstrualData: Bool,
         rng: inout SeededRandomGenerator
     ) -> ExportedHealthBundle {
         let heartRate = generateHeartRateData(preset: preset, startDate: startDate, endDate: endDate, rng: &rng)
@@ -487,7 +490,7 @@ struct SyntheticDataGenerator {
             wheelchairActivity: nil,
             exerciseTime: generateExerciseTimeData(preset: preset, startDate: startDate, endDate: endDate, rng: &rng),
             bodyTemperature: generateBodyTemperatureData(preset: preset, startDate: startDate, endDate: endDate, rng: &rng),
-            menstrualFlow: Bool.random(using: &rng) ? generateMenstrualData(startDate: startDate, endDate: endDate, rng: &rng) : nil
+            menstrualFlow: includeMenstrualData ? generateMenstrualData(startDate: startDate, endDate: endDate, rng: &rng) : nil
         )
     }
     
@@ -496,10 +499,11 @@ struct SyntheticDataGenerator {
         preset: GenerationPreset,
         startDate: Date,
         endDate: Date,
+        includeMenstrualData: Bool,
         rng: inout SeededRandomGenerator
     ) -> ExportedHealthBundle {
         guard let bundle = bundle else {
-            return generateCompleteBundle(preset: preset, startDate: startDate, endDate: endDate, rng: &rng)
+            return generateCompleteBundle(preset: preset, startDate: startDate, endDate: endDate, includeMenstrualData: includeMenstrualData, rng: &rng)
         }
         
         return ExportedHealthBundle(
@@ -518,7 +522,7 @@ struct SyntheticDataGenerator {
             wheelchairActivity: bundle.wheelchairActivity ?? (Bool.random(using: &rng) ? generateWheelchairData(preset: preset, startDate: startDate, endDate: endDate, rng: &rng) : nil),
             exerciseTime: bundle.exerciseTime ?? generateExerciseTimeData(preset: preset, startDate: startDate, endDate: endDate, rng: &rng),
             bodyTemperature: bundle.bodyTemperature ?? generateBodyTemperatureData(preset: preset, startDate: startDate, endDate: endDate, rng: &rng),
-            menstrualFlow: bundle.menstrualFlow ?? (Bool.random(using: &rng) ? generateMenstrualData(startDate: startDate, endDate: endDate, rng: &rng) : nil)
+            menstrualFlow: bundle.menstrualFlow ?? (includeMenstrualData ? generateMenstrualData(startDate: startDate, endDate: endDate, rng: &rng) : nil)
         )
     }
     
@@ -527,6 +531,7 @@ struct SyntheticDataGenerator {
         startDate: Date,
         endDate: Date,
         existingBundle: ExportedHealthBundle?,
+        includeMenstrualData: Bool,
         rng: inout SeededRandomGenerator
     ) -> ExportedHealthBundle {
         // Convert steps to wheelchair pushes
@@ -549,10 +554,10 @@ struct SyntheticDataGenerator {
                 wheelchairActivity: wheelchairData, // Add wheelchair data
                 exerciseTime: bundle.exerciseTime,
                 bodyTemperature: bundle.bodyTemperature,
-                menstrualFlow: bundle.menstrualFlow
+                menstrualFlow: includeMenstrualData ? bundle.menstrualFlow : nil
             )
         } else {
-            var bundle = generateCompleteBundle(preset: preset, startDate: startDate, endDate: endDate, rng: &rng)
+            var bundle = generateCompleteBundle(preset: preset, startDate: startDate, endDate: endDate, includeMenstrualData: includeMenstrualData, rng: &rng)
             return ExportedHealthBundle(
                 exportDate: bundle.exportDate,
                 startDate: bundle.startDate,
@@ -569,7 +574,7 @@ struct SyntheticDataGenerator {
                 wheelchairActivity: wheelchairData, // Add wheelchair data
                 exerciseTime: bundle.exerciseTime,
                 bodyTemperature: bundle.bodyTemperature,
-                menstrualFlow: bundle.menstrualFlow
+                menstrualFlow: includeMenstrualData ? bundle.menstrualFlow : nil
             )
         }
     }
@@ -802,6 +807,7 @@ struct SyntheticDataGenerator {
                     date: dayStart,
                     endDate: dayEnd,
                     flowLevel: flowLevel,
+                    isCycleStart: day == 0, // First day of period is cycle start
                     source: "HealthKitExporter"
                 ))
             }

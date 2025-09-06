@@ -24,6 +24,7 @@ class ExportManager: ObservableObject {
     @Published var overrideModeEnabled = false
     @Published var selectedPreset: GenerationPreset = .normal
     @Published var selectedManipulation: DataManipulation = .smoothReplace
+    @Published var includeMenstrualData = false
     
     private let exporter = HealthDataExporter()
     
@@ -205,6 +206,7 @@ class ExportManager: ObservableObject {
                 date: transposeDate(sample.date),
                 endDate: transposeDate(sample.endDate),
                 flowLevel: sample.flowLevel,
+                isCycleStart: sample.isCycleStart,
                 source: sample.source
             )
         }
@@ -246,7 +248,8 @@ class ExportManager: ObservableObject {
             startDate: targetStartDate,
             endDate: targetEndDate,
             existingBundle: lastExportedBundle,
-            seed: patternSeed
+            seed: patternSeed,
+            includeMenstrualData: includeMenstrualData
         )
     }
     
@@ -398,6 +401,7 @@ class ExportManager: ObservableObject {
                 date: transformation.transform(sample.date),
                 endDate: transformation.transform(sample.endDate),
                 flowLevel: sample.flowLevel, // Keep flow level as-is
+                isCycleStart: sample.isCycleStart,
                 source: sample.source
             )
         }

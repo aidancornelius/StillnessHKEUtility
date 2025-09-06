@@ -418,6 +418,8 @@ struct GeneratorView: View {
                     }
                     
                     Stepper("Random seed: \(exportManager.patternSeed)", value: $exportManager.patternSeed, in: 0...100)
+                    
+                    Toggle("Include menstrual cycle data", isOn: $exportManager.includeMenstrualData)
                 }
                 
                 Section {

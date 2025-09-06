@@ -520,10 +520,14 @@ class HealthDataExporter: ObservableObject {
                         @unknown default: flowLevel = .unspecified
                         }
                         
+                        // Extract cycle start metadata
+                        let isCycleStart = sample.metadata?[HKMetadataKeyMenstrualCycleStart] as? Bool ?? false
+                        
                         return MenstrualFlowSample(
                             date: sample.startDate,
                             endDate: sample.endDate,
                             flowLevel: flowLevel,
+                            isCycleStart: isCycleStart,
                             source: sample.sourceRevision.source.name
                         )
                     }
@@ -896,11 +900,17 @@ class HealthDataExporter: ObservableObject {
             case .none: value = .none
             }
             
+            // Create metadata dictionary with required key
+            let metadata: [String: Any] = [
+                HKMetadataKeyMenstrualCycleStart: sample.isCycleStart
+            ]
+            
             return HKCategorySample(
                 type: type,
                 value: value.rawValue,
                 start: sample.date,
-                end: sample.endDate
+                end: sample.endDate,
+                metadata: metadata
             )
         }
         
